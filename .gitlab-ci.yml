@@ -1,27 +1,49 @@
+stages:
+  - build
+  - test
+  - deploy
 
-image: ubuntu:latest
+variables:
+  SSH_PORT: "226"
+  SSH_USER: "dev"
+  SSH_HOST: "103.178.67.56"
+  DEPLOY_PATH: "/home/dev/test/"
 
+default:
+  image: ubuntu:latest
 
-build-job:
+before_script:
+  # setup ssh on host side
+  - mkdir -p ~/.ssh
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+  - chmod 600 ~/.ssh/id_rsa
+  - eval $(ssh-agent -s)
+  - ssh-add ~/.ssh/id_rsa
+  - ssh-keyscan -p $SSH_PORT $SSH_HOST >> ~/.ssh/known_hosts
+
+build:
   stage: build
   script:
-    - echo "Hello, $GITLAB_USER_LOGIN!"
+    - echo "Building the application..."
+    # Add your build commands here, for example:
+    # - docker build -t your-image-name .
 
-test-job1:
+test:
   stage: test
   script:
-    - echo "This job tests something"
+    - echo "Running tests..."
+    # Add your test commands here, for example:
+    # - docker run your-image-name test_command
 
-test-job2:
-  stage: test
-  script:
-    - echo "This job tests something, but takes more time than test-job1."
-    - echo "After the echo commands complete, it runs the sleep command for 20 seconds"
-    - echo "which simulates a test that runs 20 seconds longer than test-job1"
-    - sleep 20
-
-deploy-prod:
+deploy:
   stage: deploy
   script:
-    - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
-  environment: production
+    - echo "Deploying to server..."
+    - ssh $SSH_USER@$SSH_HOST -p $SSH_PORT
+    - ls -la
+    - mkdir -p "$DEPLOY_PATH"
+    - cd "$DEPLOY_PATH"
+    - git clone "$CI_PROJECT_URL"
+    - ls -la
+  only:
+    - main  # Deploy only from the main branch
