@@ -40,7 +40,7 @@ deploy:
   stage: deploy
   script:
     - echo "Deploying to server..."
-    - ssh $SSH_USER@$SSH_HOST -p $SSH_PORT
+    - ssh -tt $SSH_USER@$SSH_HOST -p $SSH_PORT
     - ls -la
     - mkdir -p "$DEPLOY_PATH"
     - cd "$DEPLOY_PATH"
