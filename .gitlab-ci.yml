@@ -10,13 +10,13 @@ variables:
   DEPLOY_PATH: "/home/dev/test/"
 
 default:
-  image: ubuntu:latest
+  image: ubuntu:20.04
 
 before_script:
   # setup ssh on host side
   - apt-get update -y && apt-get install -y openssh-client
   - mkdir -p ~/.ssh
-  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+  - echo "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/id_rsa
   - chmod 600 ~/.ssh/id_rsa
   - eval $(ssh-agent -s)
   - ssh-add ~/.ssh/id_rsa
