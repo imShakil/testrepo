@@ -43,7 +43,7 @@ deploy:
   script:
     - echo "Deploying to server..."
     - |
-      ssh $SSH_USER@$SSH_HOST -p $SSH_PORT << 'EOF'
+      ssh -T $SSH_USER@$SSH_HOST -p $SSH_PORT << 'EOF'
       set -e
       ls -la
       mkdir -p "$DEPLOY_PATH"
