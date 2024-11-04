@@ -15,10 +15,11 @@ default:
   - local
   before_script:
     - pwd
+    - echo $USER
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
     - echo "$SSH_KEY" | base64 --decode | ssh-add - > /dev/null
-    - mkdir -p ~/.ssh
+    - if [[ ! -d ~/.ssh ]]; then mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - echo "StrictHostKeyChecking no" > ~/.ssh/config
 
@@ -35,16 +36,18 @@ test:
   script:
     - echo "Running tests..."
     # Add your test commands here, for example:
-    - ssh -tt $SSH_USER@$SSH_HOST -p $SSH_PORT "echo 'Testing SSH connection'; exit"
-    # - docker run your-image-name test_command
+    - ssh $SSH_USER@$SSH_HOST -p $SSH_PORT "echo 'Testing SSH connection'; exit"
 
 deploy:
   stage: deploy
   script:
     - echo "Deploying to server..."
-    - ssh -tt $SSH_USER@$SSH_HOST -p $SSH_PORT
-    - ls -la
-    - mkdir -p "$DEPLOY_PATH"
-    - cd "$DEPLOY_PATH"
-    - git clone "$CI_PROJECT_URL"
-    - ls -la
+    - |
+      ssh $SSH_USER@$SSH_HOST -p $SSH_PORT << 'EOF'
+      set -e
+      ls -la
+      mkdir -p "$DEPLOY_PATH"
+      cd "$DEPLOY_PATH"
+      git clone "$CI_PROJECT_URL"
+      ls -la
+      EOF
