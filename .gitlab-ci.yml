@@ -28,6 +28,7 @@ build:
   script:
     - echo "Building the application..."
     - ls -la
+    - scp "./test.sh" $SSH_USER@$SSH_HOST:$DEPLOY_PATH
     # Add your build commands here, for example:
     # - docker build -t your-image-name .
 
@@ -35,19 +36,9 @@ test:
   stage: test
   script:
     - echo "Running tests..."
-    # Add your test commands here, for example:
-    - ssh $SSH_USER@$SSH_HOST -p $SSH_PORT "echo 'Testing SSH connection'; exit"
+    - ssh $SSH_USER@$SSH_HOST -p $SSH_PORT sh "$DEPLOY_PATH/test.sh"
 
 deploy:
   stage: deploy
   script:
     - echo "Deploying to server..."
-    - |
-      ssh -T $SSH_USER@$SSH_HOST -p $SSH_PORT << 'EOF'
-      set -e
-      ls -la
-      mkdir -p "$DEPLOY_PATH"
-      cd "$DEPLOY_PATH"
-      git clone "$CI_PROJECT_URL"
-      ls -la
-      EOF
