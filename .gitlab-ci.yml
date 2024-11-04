@@ -19,7 +19,7 @@ default:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
     - echo "$SSH_KEY" | base64 --decode | ssh-add - > /dev/null
-    - if [[ ! -d ~/.ssh ]]; then mkdir -p ~/.ssh
+    - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - echo "StrictHostKeyChecking no" > ~/.ssh/config
 
