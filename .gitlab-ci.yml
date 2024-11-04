@@ -4,7 +4,7 @@ stages:
   - deploy
 
 variables:
-  SSH_PORT: "226"
+  SSH_PORT: "22"
   SSH_USER: "dev"
   SSH_HOST: "104.248.98.157"
   DEPLOY_PATH: "/home/dev/test/"
