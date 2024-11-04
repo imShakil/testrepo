@@ -10,22 +10,24 @@ variables:
   DEPLOY_PATH: "/home/dev/test/"
 
 default:
-  image: ubuntu:20.04
-
-before_script:
-  # setup ssh on host side
-  - apt-get update -y && apt-get install -y openssh-client
-  - mkdir -p ~/.ssh
-  - echo "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/id_rsa
-  - chmod 600 ~/.ssh/id_rsa
-  - eval $(ssh-agent -s)
-  - ssh-add ~/.ssh/id_rsa
-  - ssh-keyscan -p $SSH_PORT $SSH_HOST >> ~/.ssh/known_hosts
+  tags:
+  - local
+  before_script:
+    - pwd
+    - ls -la
+    - ls -la .ssh/
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "StrictHostKeyChecking no" > ~/.ssh/config
 
 build:
   stage: build
   script:
     - echo "Building the application..."
+    - ls -la
     # Add your build commands here, for example:
     # - docker build -t your-image-name .
 
@@ -34,6 +36,7 @@ test:
   script:
     - echo "Running tests..."
     # Add your test commands here, for example:
+    - ssh -tt $SSH_USER@$SSH_HOST -p $SSH_PORT "echo 'Testing SSH connection'; exit"
     # - docker run your-image-name test_command
 
 deploy:
@@ -46,5 +49,3 @@ deploy:
     - cd "$DEPLOY_PATH"
     - git clone "$CI_PROJECT_URL"
     - ls -la
-  only:
-    - main  # Deploy only from the main branch
